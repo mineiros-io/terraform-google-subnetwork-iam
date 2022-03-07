@@ -30,6 +30,7 @@ module "test" {
   module_enabled = false
 
   # add all required arguments
+  subnetwork = "test-subnet"
 
   # add all optional arguments that create additional resources
 }

@@ -29,7 +29,7 @@ provider "aws" {
 module "test" {
   source = "../.."
 
-  # add only required arguments and no optional arguments
+  subnetwork = "test-subnet"
 }
 
 # outputs generate non-idempotent terraform plans so we disable them for now unless we need them.
