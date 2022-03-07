@@ -3,19 +3,16 @@
 [![Build Status](https://github.com/mineiros-io/terraform-google-subnetwork-iam/workflows/Tests/badge.svg)](https://github.com/mineiros-io/terraform-google-subnetwork-iam/actions)
 [![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/mineiros-io/terraform-google-subnetwork-iam.svg?label=latest&sort=semver)](https://github.com/mineiros-io/terraform-google-subnetwork-iam/releases)
 [![Terraform Version](https://img.shields.io/badge/Terraform-1.x-623CE4.svg?logo=terraform)](https://github.com/hashicorp/terraform/releases)
-[![AWS Provider Version](https://img.shields.io/badge/AWS-3-F8991D.svg?logo=terraform)](https://github.com/terraform-providers/terraform-provider-aws/releases)
+[![Google Provider Version](https://img.shields.io/badge/google-4-1A73E8.svg?logo=terraform)](https://github.com/terraform-providers/terraform-provider-google/releases)
 [![Join Slack](https://img.shields.io/badge/slack-@mineiros--community-f32752.svg?logo=slack)](https://mineiros.io/slack)
 
 # terraform-google-subnetwork-iam
 
-A [Terraform] module for [Amazon Web Services (AWS)][aws].
+A [Terraform](https://www.terraform.io) module to create a [Google Compute Subnetwork IAM](https://cloud.google.com/compute/docs/access/iam) on [Google Cloud Services (GCP)](https://cloud.google.com/).
 
-**_This module supports Terraform version 1
-and is compatible with the Terraform AWS Provider version 3._**
+**_This module supports Terraform version 1 and is compatible with the Terraform Google Provider version 4._**
 
-This module is part of our Infrastructure as Code (IaC) framework
-that enables our users and customers to easily deploy and manage reusable,
-secure, and production-grade cloud infrastructure.
+This module is part of our Infrastructure as Code (IaC) framework that enables our users and customers to easily deploy and manage reusable, secure, and production-grade cloud infrastructure.
 
 
 - [Module Features](#module-features)
@@ -23,10 +20,10 @@ secure, and production-grade cloud infrastructure.
 - [Module Argument Reference](#module-argument-reference)
   - [Main Resource Configuration](#main-resource-configuration)
   - [Module Configuration](#module-configuration)
-- [Module Outputs](#module-outputs)
-- [External Documentation](#external-documentation)
-  - [AWS Documentation IAM](#aws-documentation-iam)
-  - [Terraform AWS Provider Documentation](#terraform-aws-provider-documentation)
+  - [Module Outputs](#module-outputs)
+  - [External Documentation](#external-documentation)
+    - [Google Documentation](#google-documentation)
+    - [Terraform Google Provider Documentation:](#terraform-google-provider-documentation)
 - [Module Versioning](#module-versioning)
   - [Backwards compatibility in `0.0.z` and `0.y.z` version](#backwards-compatibility-in-00z-and-0yz-version)
 - [About Mineiros](#about-mineiros)
@@ -39,20 +36,22 @@ secure, and production-grade cloud infrastructure.
 
 This module implements the following Terraform resources:
 
-- `null_resource`
-
-and supports additional features of the following modules:
-
-- [mineiros-io/something/google](https://github.com/mineiros-io/terraform-google-something)
+- `google_compute_subnetwork_iam_binding`
+- `google_compute_subnetwork_iam_member`
+- `google_compute_subnetwork_iam_policy`
 
 ## Getting Started
 
 Most common usage of the module:
 
 ```hcl
-module "terraform-google-subnetwork-iam" {
-  source = "git@github.com:mineiros-io/terraform-google-subnetwork-iam.git?ref=v0.0.1"
-}
+  module "terraform-google-storage-bucket-iam" {
+    source = "github.com/mineiros-io/terraform-google-storage-bucket-iam?ref=v0.1.0"
+
+    subnetwork  = "my-subnetwork"
+    role    = "roles/storage.admin"
+    members = ["user:member@example.com"]
+  }
 ```
 
 ## Module Argument Reference
@@ -61,40 +60,90 @@ See [variables.tf] and [examples/] for details and use-cases.
 
 ### Main Resource Configuration
 
-- [**`example_required`**](#var-example_required): *(**Required** `string`)*<a name="var-example_required"></a>
+- [**`subnetwork`**](#var-subnetwork): *(**Required** `string`)*<a name="var-subnetwork"></a>
 
-  The name of the resource
+  Used to find the parent resource to bind the IAM policy to.
 
-- [**`example_name`**](#var-example_name): *(Optional `string`)*<a name="var-example_name"></a>
+- [**`members`**](#var-members): *(Optional `set(string)`)*<a name="var-members"></a>
 
-  The name of the resource
+  Identities that will be granted the privilege in role. Each entry can have one of the following values:
+  - `allUsers`: A special identifier that represents anyone who is on the internet; with or without a Google account.
+  - `allAuthenticatedUsers`: A special identifier that represents anyone who is authenticated with a Google account or a service account.
+  - `user:{emailid}`: An email address that represents a specific Google account. For example, alice@gmail.com or joe@example.com.
+  - `serviceAccount:{emailid}`: An email address that represents a service account. For example, my-other-app@appspot.gserviceaccount.com.
+  - `group:{emailid}`: An email address that represents a Google group. For example, admins@example.com.
+  - `domain:{domain}`: A G Suite domain (primary, instead of alias) name that represents all the users of that domain. For example, google.com or example.com.
+  - `projectOwner:projectid`: Owners of the given project. For example, `projectOwner:my-example-project`
+  - `projectEditor:projectid`: Editors of the given project. For example, `projectEditor:my-example-project`
+  - `projectViewer:projectid`: Viewers of the given project. For example, `projectViewer:my-example-project`
 
-  Default is `"optional-resource-name"`.
+  Default is `[]`.
 
-- [**`example_user_object`**](#var-example_user_object): *(Optional `object(user)`)*<a name="var-example_user_object"></a>
+- [**`role`**](#var-role): *(Optional `string`)*<a name="var-role"></a>
 
-  Default is `{}`.
+  The role that should be applied. Note that custom roles must be of the format `[projects|organizations]/{parent-name}/roles/{role-name}`.
+
+- [**`project`**](#var-project): *(Optional `string`)*<a name="var-project"></a>
+
+  The ID of the project in which the resource belongs. If it is not provided, the project will be parsed from the identifier of the parent resource. If no project is provided in the parent identifier and no project is specified, the provider project is used.
+
+- [**`authoritative`**](#var-authoritative): *(Optional `bool`)*<a name="var-authoritative"></a>
+
+  Whether to exclusively set (authoritative mode) or add (non-authoritative/additive mode) members to the role.
+
+  Default is `true`.
+
+- [**`policy_bindings`**](#var-policy_bindings): *(Optional `list(policy_binding)`)*<a name="var-policy_bindings"></a>
+
+  A list of IAM policy bindings.
 
   Example:
 
   ```hcl
-  user = {
-    name        = "marius"
-    description = "The guy from Berlin."
-  }
+  policy_bindings = [{
+    role    = "roles/viewer"
+    members = ["user:member@example.com"]
+  }]
   ```
 
-  The `user` object accepts the following attributes:
+  Each `policy_binding` object in the list accepts the following attributes:
 
-  - [**`name`**](#attr-example_user_object-name): *(**Required** `string`)*<a name="attr-example_user_object-name"></a>
+  - [**`role`**](#attr-policy_bindings-role): *(**Required** `string`)*<a name="attr-policy_bindings-role"></a>
 
-    The name of the user
+    The role that should be applied.
 
-  - [**`description`**](#attr-example_user_object-description): *(Optional `string`)*<a name="attr-example_user_object-description"></a>
+  - [**`members`**](#attr-policy_bindings-members): *(Optional `set(string)`)*<a name="attr-policy_bindings-members"></a>
 
-    A description describng the user in more detail
+    Identities that will be granted the privilege in `role`.
 
-    Default is `""`.
+    Default is `var.members`.
+
+  - [**`condition`**](#attr-policy_bindings-condition): *(Optional `object(condition)`)*<a name="attr-policy_bindings-condition"></a>
+
+    An IAM Condition for a given binding.
+
+    Example:
+
+    ```hcl
+    condition = {
+      expression = "request.time < timestamp(\"2022-01-01T00:00:00Z\")"
+      title      = "expires_after_2021_12_31"
+    }
+    ```
+
+    The `condition` object accepts the following attributes:
+
+    - [**`expression`**](#attr-policy_bindings-condition-expression): *(**Required** `string`)*<a name="attr-policy_bindings-condition-expression"></a>
+
+      Textual representation of an expression in Common Expression Language syntax.
+
+    - [**`title`**](#attr-policy_bindings-condition-title): *(**Required** `string`)*<a name="attr-policy_bindings-condition-title"></a>
+
+      A title for the expression, i.e. a short string describing its purpose.
+
+    - [**`description`**](#attr-policy_bindings-condition-description): *(Optional `string`)*<a name="attr-policy_bindings-condition-description"></a>
+
+      An optional description of the expression. This is a longer text which describes the expression, e.g. when hovered over it in a UI.
 
 ### Module Configuration
 
@@ -103,55 +152,6 @@ See [variables.tf] and [examples/] for details and use-cases.
   Specifies whether resources in the module will be created.
 
   Default is `true`.
-
-- [**`module_tags`**](#var-module_tags): *(Optional `map(string)`)*<a name="var-module_tags"></a>
-
-  A map of tags that will be applied to all created resources that accept tags.
-  Tags defined with `module_tags` can be overwritten by resource-specific tags.
-
-  Default is `{}`.
-
-  Example:
-
-  ```hcl
-  module_tags = {
-    environment = "staging"
-    team        = "platform"
-  }
-  ```
-
-- [**`module_timeouts`**](#var-module_timeouts): *(Optional `map(timeout)`)*<a name="var-module_timeouts"></a>
-
-  A map of timeout objects that is keyed by Terraform resource name
-  defining timeouts for `create`, `update` and `delete` Terraform operations.
-
-  Supported resources are: `null_resource`, ...
-
-  Example:
-
-  ```hcl
-  module_timeouts = {
-    null_resource = {
-      create = "4m"
-      update = "4m"
-      delete = "4m"
-    }
-  }
-  ```
-
-  Each `timeout` object in the map accepts the following attributes:
-
-  - [**`create`**](#attr-module_timeouts-create): *(Optional `string`)*<a name="attr-module_timeouts-create"></a>
-
-    Timeout for create operations.
-
-  - [**`update`**](#attr-module_timeouts-update): *(Optional `string`)*<a name="attr-module_timeouts-update"></a>
-
-    Timeout for update operations.
-
-  - [**`delete`**](#attr-module_timeouts-delete): *(Optional `string`)*<a name="attr-module_timeouts-delete"></a>
-
-    Timeout for delete operations.
 
 - [**`module_depends_on`**](#var-module_depends_on): *(Optional `list(dependency)`)*<a name="var-module_depends_on"></a>
 
@@ -168,7 +168,7 @@ See [variables.tf] and [examples/] for details and use-cases.
   ]
   ```
 
-## Module Outputs
+### Module Outputs
 
 The following attributes are exported in the outputs of the module:
 
@@ -176,24 +176,15 @@ The following attributes are exported in the outputs of the module:
 
   Whether this module is enabled.
 
-- [**`module_tags`**](#output-module_tags): *(`map(string)`)*<a name="output-module_tags"></a>
+### External Documentation
 
-  The map of tags that are being applied to all created resources that accept tags.
+#### Google Documentation
 
-## External Documentation
+- https://cloud.google.com/compute/docs/access/iam
 
-### AWS Documentation IAM
+#### Terraform Google Provider Documentation:
 
-- https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html
-- https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies.html
-- https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html
-
-### Terraform AWS Provider Documentation
-
-- https://www.terraform.io/docs/providers/aws/r/iam_role.html
-- https://www.terraform.io/docs/providers/aws/r/iam_role_policy.html
-- https://www.terraform.io/docs/providers/aws/r/iam_role_policy_attachment.html
-- https://www.terraform.io/docs/providers/aws/r/iam_instance_profile.html
+- https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_subnetwork_iam#google_compute_subnetwork_iam_policy
 
 ## Module Versioning
 
@@ -252,11 +243,9 @@ Copyright &copy; 2020-2022 [Mineiros GmbH][homepage]
 [hello@mineiros.io]: mailto:hello@mineiros.io
 [badge-license]: https://img.shields.io/badge/license-Apache%202.0-brightgreen.svg
 [releases-terraform]: https://github.com/hashicorp/terraform/releases
-[releases-aws-provider]: https://github.com/terraform-providers/terraform-provider-aws/releases
 [apache20]: https://opensource.org/licenses/Apache-2.0
 [slack]: https://mineiros.io/slack
 [terraform]: https://www.terraform.io
-[aws]: https://aws.amazon.com/
 [semantic versioning (semver)]: https://semver.org/
 [variables.tf]: https://github.com/mineiros-io/terraform-google-subnetwork-iam/blob/main/variables.tf
 [examples/]: https://github.com/mineiros-io/terraform-google-subnetwork-iam/blob/main/examples
