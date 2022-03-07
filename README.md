@@ -184,7 +184,7 @@ The following attributes are exported in the outputs of the module:
 
 #### Terraform Google Provider Documentation:
 
-- https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_subnetwork_iam#google_compute_subnetwork_iam_policy
+- https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_subnetwork_iam
 
 ## Module Versioning
 

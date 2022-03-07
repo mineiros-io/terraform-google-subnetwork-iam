@@ -253,7 +253,7 @@ section {
       section {
         title   = "Terraform Google Provider Documentation:"
         content = <<-END
-        - https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_subnetwork_iam#google_compute_subnetwork_iam_policy
+        - https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_subnetwork_iam
       END
       }
     }
