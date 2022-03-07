@@ -2,7 +2,7 @@
 # OUTPUT CALCULATED VARIABLES (prefer full objects)
 # ----------------------------------------------------------------------------------------------------------------------
 
-ocals {
+locals {
   binding = try(google_compute_subnetwork_iam_binding.binding[0], null)
   member  = try(google_compute_subnetwork_iam_member.member, null)
   policy  = try(google_compute_subnetwork_iam_policy.policy[0], null)
