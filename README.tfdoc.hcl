@@ -61,12 +61,12 @@ section {
       Most common usage of the module:
 
       ```hcl
-        module "terraform-google-storage-bucket-iam" {
-          source = "github.com/mineiros-io/terraform-google-storage-bucket-iam?ref=v0.1.0"
+        module "terraform-google-subnetwork-iam" {
+          source = "github.com/mineiros-io/terraform-google-subnetwork-iam?ref=v0.0.1"
 
-          subnetwork  = "my-subnetwork"
-          role    = "roles/storage.admin"
-          members = ["user:member@example.com"]
+          subnetwork = "my-subnetwork"
+          role       = "roles/storage.admin"
+          members    = ["user:member@example.com"]
         }
       ```
     END
