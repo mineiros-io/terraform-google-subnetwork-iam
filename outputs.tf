@@ -1,11 +1,7 @@
-# ----------------------------------------------------------------------------------------------------------------------
-# OUTPUT CALCULATED VARIABLES (prefer full objects)
-# ----------------------------------------------------------------------------------------------------------------------
-
 locals {
-  binding = try(google_compute_subnetwork_iam_binding.binding[0], null)
-  member  = try(google_compute_subnetwork_iam_member.member, null)
-  policy  = try(google_compute_subnetwork_iam_policy.policy[0], null)
+  binding = one(google_compute_subnetwork_iam_binding.binding)
+  member  = google_compute_subnetwork_iam_member.member
+  policy  = one(google_compute_subnetwork_iam_policy.policy)
 
   iam_output = [local.binding, local.member, local.policy]
 
@@ -15,17 +11,4 @@ locals {
 output "iam" {
   description = "All attributes of the created 'iam_binding' or 'iam_member' or 'iam_policy' resource according to the mode."
   value       = local.iam_output[local.iam_output_index]
-}
-
-# ----------------------------------------------------------------------------------------------------------------------
-# OUTPUT ALL RESOURCES AS FULL OBJECTS
-# ----------------------------------------------------------------------------------------------------------------------
-
-# ----------------------------------------------------------------------------------------------------------------------
-# OUTPUT MODULE CONFIGURATION
-# ----------------------------------------------------------------------------------------------------------------------
-
-output "module_enabled" {
-  description = "Whether or not the module is enabled."
-  value       = var.module_enabled
 }

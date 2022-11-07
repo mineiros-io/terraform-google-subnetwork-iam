@@ -103,7 +103,26 @@ section {
             - `projectOwner:projectid`: Owners of the given project. For example, `projectOwner:my-example-project`
             - `projectEditor:projectid`: Editors of the given project. For example, `projectEditor:my-example-project`
             - `projectViewer:projectid`: Viewers of the given project. For example, `projectViewer:my-example-project`
+            - `computed:{identifier}`: An existing key from var.computed_members_map.
           END
+      }
+
+      variable "computed_members_map" {
+        type        = map(string)
+        default     = {}
+        description = <<-END
+           A map of identifiers to identities to be replaced in 'var.members' or in members of `policy_bindings` to handle terraform computed values.
+           The format of each value must satisfy the format as described in `var.members`.
+         END
+        # readme_example = <<-END
+        #   members = [
+        #     "user:member@example.com",
+        #     "computed:myserviceaccount",
+        #   ]
+        #   computed_members_map = {
+        #     myserviceaccount = "serviceAccount:${google_service_account.service_account.id}"
+        #   }
+        # END
       }
 
       variable "role" {
@@ -126,6 +145,36 @@ section {
         description = <<-END
             Whether to exclusively set (authoritative mode) or add (non-authoritative/additive mode) members to the role.
           END
+      }
+
+      variable "condition" {
+        type        = object(condition)
+        description = <<-END
+          An IAM Condition for the target project IAM binding.
+        END
+
+        attribute "expression" {
+          required    = true
+          type        = string
+          description = <<-END
+            Textual representation of an expression in Common Expression Language syntax.
+          END
+        }
+
+        attribute "title" {
+          required    = true
+          type        = string
+          description = <<-END
+            A title for the expression, i.e., a short string describing its purpose.
+          END
+        }
+
+        attribute "description" {
+          type        = string
+          description = <<-END
+            An optional description of the expression. This is a longer text which describes the expression, e.g. when hovered over it in a UI.
+          END
+        }
       }
 
       variable "policy_bindings" {
@@ -232,10 +281,10 @@ section {
       The following attributes are exported in the outputs of the module:
     END
 
-      output "module_enabled" {
-        type        = bool
+      output "iam" {
+        type        = object(iam)
         description = <<-END
-          Whether this module is enabled.
+          All attributes of the created 'iam_binding' or 'iam_member' or 'iam_policy' resource according to the mode."
         END
       }
     }

@@ -76,8 +76,16 @@ See [variables.tf] and [examples/] for details and use-cases.
   - `projectOwner:projectid`: Owners of the given project. For example, `projectOwner:my-example-project`
   - `projectEditor:projectid`: Editors of the given project. For example, `projectEditor:my-example-project`
   - `projectViewer:projectid`: Viewers of the given project. For example, `projectViewer:my-example-project`
+  - `computed:{identifier}`: An existing key from var.computed_members_map.
 
   Default is `[]`.
+
+- [**`computed_members_map`**](#var-computed_members_map): *(Optional `map(string)`)*<a name="var-computed_members_map"></a>
+
+  A map of identifiers to identities to be replaced in 'var.members' or in members of `policy_bindings` to handle terraform computed values.
+  The format of each value must satisfy the format as described in `var.members`.
+
+  Default is `{}`.
 
 - [**`role`**](#var-role): *(Optional `string`)*<a name="var-role"></a>
 
@@ -92,6 +100,24 @@ See [variables.tf] and [examples/] for details and use-cases.
   Whether to exclusively set (authoritative mode) or add (non-authoritative/additive mode) members to the role.
 
   Default is `true`.
+
+- [**`condition`**](#var-condition): *(Optional `object(condition)`)*<a name="var-condition"></a>
+
+  An IAM Condition for the target project IAM binding.
+
+  The `condition` object accepts the following attributes:
+
+  - [**`expression`**](#attr-condition-expression): *(**Required** `string`)*<a name="attr-condition-expression"></a>
+
+    Textual representation of an expression in Common Expression Language syntax.
+
+  - [**`title`**](#attr-condition-title): *(**Required** `string`)*<a name="attr-condition-title"></a>
+
+    A title for the expression, i.e., a short string describing its purpose.
+
+  - [**`description`**](#attr-condition-description): *(Optional `string`)*<a name="attr-condition-description"></a>
+
+    An optional description of the expression. This is a longer text which describes the expression, e.g. when hovered over it in a UI.
 
 - [**`policy_bindings`**](#var-policy_bindings): *(Optional `list(policy_binding)`)*<a name="var-policy_bindings"></a>
 
@@ -172,9 +198,9 @@ See [variables.tf] and [examples/] for details and use-cases.
 
 The following attributes are exported in the outputs of the module:
 
-- [**`module_enabled`**](#output-module_enabled): *(`bool`)*<a name="output-module_enabled"></a>
+- [**`iam`**](#output-iam): *(`object(iam)`)*<a name="output-iam"></a>
 
-  Whether this module is enabled.
+  All attributes of the created 'iam_binding' or 'iam_member' or 'iam_policy' resource according to the mode."
 
 ### External Documentation
 
