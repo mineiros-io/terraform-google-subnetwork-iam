@@ -1,56 +1,113 @@
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# COMPLETE FEATURES UNIT TEST
-# This module tests a complete set of most/all non-exclusive features
-# The purpose is to activate everything the module offers, but trying to keep execution time and costs minimal.
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+module "test-sa" {
+  source = "github.com/mineiros-io/terraform-google-service-account?ref=v0.0.10"
 
-variable "aws_region" {
-  description = "(Optional) The AWS region in which all resources will be created."
-  type        = string
-  default     = "us-east-1"
+  account_id = "service-account-id-${local.random_suffix}"
 }
 
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 3.0"
-    }
-  }
-}
-
-provider "aws" {
-  region = var.aws_region
-}
-
-# DO NOT RENAME MODULE NAME
 module "test" {
   source = "../.."
 
-  module_enabled = true
-
   # add all required arguments
-  subnetwork = "test-subnet"
 
-  # add all optional arguments that create additional resources
-  role    = "roles/storage.admin"
-  members = ["user:member@example.com"]
-  policy_bindings = [{
-    role    = "roles/viewer"
-    members = ["user:member@example.com"]
-    condition = {
-      expression = "request.time < timestamp(\"2022-01-01T00:00:00Z\")"
-      title      = "expires_after_2021_12_31"
-    }
-  }]
-  authoritative = true
+  subnetwork = "unit-complete-${local.random_suffix}"
+
+  role = "roles/viewer"
+
+  # add all optional arguments that create additional/extended resources
+
+  members = [
+    "user:member@example.com",
+    "computed:myserviceaccount",
+  ]
+  computed_members_map = {
+    myserviceaccount = "serviceAccount:${module.test-sa.service_account.email}"
+  }
+
+  condition = {
+    title       = "allow after 2020"
+    description = "allow access from 2020"
+    expression  = "request.time.getFullYear() > 2020"
+  }
+
   # add most/all other optional arguments
-
-  module_depends_on = ["nothing"]
 }
 
-# outputs generate non-idempotent terraform plans so we disable them for now unless we need them.
-# output "all" {
-#   description = "All outputs of the module."
-#   value       = module.test
-# }
+module "test2" {
+  source = "../.."
+
+  # add all required arguments
+
+  subnetwork = "unit-complete-${local.random_suffix}"
+
+  role = "roles/viewer"
+
+  # add all optional arguments that create additional/extended resources
+
+  authoritative = false
+  members = [
+    "user:member@example.com",
+    "computed:myserviceaccount",
+  ]
+  computed_members_map = {
+    myserviceaccount = "serviceAccount:${module.test-sa.service_account.email}"
+  }
+
+  # add most/all other optional arguments
+}
+
+module "test3" {
+  source = "../.."
+
+  # add all required arguments
+
+  subnetwork = "unit-complete-${local.random_suffix}"
+
+  policy_bindings = [
+    {
+      role = "roles/viewer"
+      members = [
+        "user:member@example.com",
+        "computed:myserviceaccount",
+      ]
+    },
+    {
+      role = "roles/browser"
+      members = [
+        "user:member@example.com",
+      ]
+    }
+  ]
+
+  computed_members_map = {
+    myserviceaccount = "serviceAccount:${module.test-sa.service_account.email}"
+  }
+  # add all optional arguments that create additional/extended resources
+
+  # add most/all other optional arguments
+}
+
+module "test4" {
+  source = "../.."
+
+  # add all required arguments
+
+  subnetwork = "unit-complete-${local.random_suffix}"
+
+  policy_bindings = [
+    {
+      role = "roles/viewer"
+      members = [
+        "user:member@example.com",
+        "computed:myserviceaccount",
+      ]
+    },
+  ]
+
+  computed_members_map = {
+    myserviceaccount = "serviceAccount:${module.test-sa.precomputed_email}"
+  }
+  # add all optional arguments that create additional/extended resources
+
+  # add most/all other optional arguments
+  project = local.project_id
+}

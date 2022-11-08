@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add variable `project`
+- Add variable `condition`
+- Add support for `computed_members`
+
+### Removed
+
+- BREAKING CHANGE: Remove output `module_enabled`
+
 ## [0.0.1]
 
 ### Added
