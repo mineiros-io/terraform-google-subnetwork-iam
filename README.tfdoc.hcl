@@ -62,7 +62,7 @@ section {
 
       ```hcl
         module "terraform-google-subnetwork-iam" {
-          source = "github.com/mineiros-io/terraform-google-subnetwork-iam?ref=v0.0.1"
+          source = "github.com/mineiros-io/terraform-google-subnetwork-iam?ref=v0.1.0"
 
           subnetwork = "my-subnetwork"
           role       = "roles/storage.admin"
